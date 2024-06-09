@@ -1,51 +1,106 @@
 let puntuacion: number = 0;
-const valoresCarta: { [key: number]: number } = { 10: 0.5, 11: 0.5, 12: 0.5 };
-const cartasRepartidas: number[] = [];
-let cartasSimuladas: number[] = [];
-
-// Muestra puntuación
-const muestraPuntuacion = (): void => {
-  const puntuacionElement = document.getElementById("puntuacion");
-  if (puntuacionElement) {
-    puntuacionElement.innerHTML = `Su puntuación es de: ${puntuacion}`;
-  }
-};
+let primeraCartaPedida: boolean = false;
 
 // Invoca a la función en cuanto este disponible el DOM.
 document.addEventListener("DOMContentLoaded", () => {
   muestraPuntuacion();
-  pideCarta();
+  botonPedirCarta();
   botonMePlanto();
-  botonVerLoQueHubieraPasado();
   nuevaPartida();
+  botonVerLoQueHubieraPasado();
   muestraCartaBocaAbajo();
+  bloquearBotonMePlanto(true);
 });
 
-// Mostrar carta boca abajo
-const muestraCartaBocaAbajo = (): void => {
-  const cartasContainer = document.getElementById("cartas");
-  if (cartasContainer) {
-    cartasContainer.innerHTML = `<img id="carta" src="https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg" alt="Carta boca abajo" width="250" height="350" />`;
+// Funciones de inicialización de botones
+const botonPedirCarta = (): void => {
+  const pedirCartaElement = document.getElementById("pedirCarta");
+  if (pedirCartaElement && pedirCartaElement instanceof HTMLButtonElement) {
+    pedirCartaElement.addEventListener("click", () => {
+      pideCarta();
+    });
   }
 };
 
-// Dame carta
-const dameCarta = (): number => {
-  let random: number;
-  do {
-    random = Math.floor(Math.random() * 10) + 1;
-    random = random > 7 ? random + 2 : random;
-  } while (cartasRepartidas.includes(random));
-
-  cartasRepartidas.push(random);
-  return random;
+const botonMePlanto = (): void => {
+  const elementMePlanto = document.getElementById("mePlanto");
+  if (elementMePlanto && elementMePlanto instanceof HTMLButtonElement) {
+    elementMePlanto.addEventListener("click", () => {
+      mePlanto();
+    });
+  }
 };
 
-// Mostrar carta
-const muestraCarta = (carta: number): void => {
-  const cartasContainer = document.getElementById("cartas");
-  if (!cartasContainer) return;
+const nuevaPartida = (): void => {
+  const nuevaPartidaElement = document.getElementById("nuevaPartida");
+  if (nuevaPartidaElement && nuevaPartidaElement instanceof HTMLButtonElement) {
+    nuevaPartidaElement.addEventListener("click", () => {
+      reiniciarPartida();
+    });
+  }
+};
 
+const botonVerLoQueHubieraPasado = (): void => {
+  const verLoQueHubieraPasadoElement = document.getElementById(
+    "verLoQueHubieraPasado"
+  );
+  if (
+    verLoQueHubieraPasadoElement &&
+    verLoQueHubieraPasadoElement instanceof HTMLButtonElement
+  ) {
+    verLoQueHubieraPasadoElement.addEventListener("click", () => {
+      verLoQueHubieraPasado();
+    });
+  }
+};
+
+// Funciones de juego
+const pideCarta = (): void => {
+  const numeroAleatorio: number = generarNumeroAleatorio();
+  const carta: number = generarNumeroCarta(numeroAleatorio);
+  bloquearBotonMePlanto(false);
+  bloquearBotonVerLoQueHubieraPasado(true);
+  const urlCarta: string = obtenerUrlCarta(carta);
+  muestraCarta(urlCarta);
+  const puntos = obtenerPuntosCarta(carta);
+  const puntosSumados = sumarPuntos(puntos);
+  actualizarPuntos(puntosSumados);
+  revisarMano();
+  muestraPuntuacion();
+};
+
+const mePlanto = (): void => {
+  const mensajeMePlanto = obtenerMensajePlantado();
+  pintarMensaje(mensajeMePlanto);
+  bloquearBotonPedirCarta(true);
+  bloquearBotonMePlanto(true);
+  bloquearBotonVerLoQueHubieraPasado(false);
+};
+
+const verLoQueHubieraPasado = (): void => {
+  const numeroAleatorio: number = generarNumeroAleatorio();
+  const carta: number = generarNumeroCarta(numeroAleatorio);
+  const urlCarta: string = obtenerUrlCarta(carta);
+  muestraCarta(urlCarta);
+  const puntos = obtenerPuntosCarta(carta);
+  const puntosSumados = sumarPuntos(puntos);
+  actualizarPuntos(puntosSumados);
+  revisarMano();
+  muestraPuntuacion();
+
+  bloquearBotonVerLoQueHubieraPasado(true);
+};
+
+// Funciones auxiliares
+const generarNumeroAleatorio = (): number => {
+  return Math.floor(Math.random() * 10) + 1;
+};
+
+const generarNumeroCarta = (numeroAleatorio: number): number => {
+  return numeroAleatorio > 7 ? numeroAleatorio + 2 : numeroAleatorio;
+};
+
+const obtenerUrlCarta = (carta: number): string => {
   let cartaUrl: string = "";
   switch (carta) {
     case 1:
@@ -91,81 +146,52 @@ const muestraCarta = (carta: number): void => {
     default:
       break;
   }
+  return cartaUrl;
+};
 
-  if (cartaUrl) {
-    const imgElement = document.createElement("img");
-    imgElement.setAttribute("src", cartaUrl);
-    imgElement.classList.add("carta");
-    cartasContainer.appendChild(imgElement);
+const muestraCarta = (urlCarta: string): void => {
+  const imgCarta = document.getElementById("carta");
+  if (imgCarta && imgCarta instanceof HTMLImageElement) {
+    imgCarta.src = urlCarta;
   }
 };
 
-// Pedir carta
-const pideCarta = (): void => {
-  const elemenetPideCarta = document.getElementById("pedirCarta");
-  if (elemenetPideCarta) {
-    elemenetPideCarta.addEventListener("click", () => {
-      const carta = dameCarta();
-      muestraCarta(carta);
-      sumaPuntuacion(carta);
-    });
-  }
+const obtenerPuntosCarta = (carta: number): number => {
+  return carta > 7 ? 0.5 : carta;
 };
 
-// Botón me planto
-const botonMePlanto = (): void => {
-  const elementMePlanto = document.getElementById("mePlanto");
-  if (elementMePlanto) {
-    elementMePlanto.addEventListener("click", () => {
-      mePlanto();
-    });
-  }
+const sumarPuntos = (puntos: number): number => {
+  puntuacion += puntos;
+  return puntuacion;
 };
 
-// Botón ver lo que hubiera pasado
-const botonVerLoQueHubieraPasado = (): void => {
-  const elementVerLoQueHubieraPasado = document.getElementById(
-    "verLoQueHubieraPasado"
-  );
-  if (elementVerLoQueHubieraPasado) {
-    elementVerLoQueHubieraPasado.addEventListener("click", () => {
-      verLoQueHubieraPasado();
-    });
-  }
+const actualizarPuntos = (nuevosPuntos: number): void => {
+  puntuacion = nuevosPuntos;
 };
 
-// Sumar puntuación
-const sumaPuntuacion = (carta: number): void => {
-  if (valoresCarta[carta] !== undefined) {
-    puntuacion += valoresCarta[carta];
-  } else {
-    puntuacion += carta;
-  }
-  muestraPuntuacion();
-  gameOver();
-};
-
-// Game over
-const gameOver = (): void => {
-  const puntuacionElement = document.getElementById("puntuacion");
-  const pedirCartaElement = document.getElementById("pedirCarta");
-  if (!puntuacionElement || !pedirCartaElement) return;
-
+const revisarMano = () => {
   if (puntuacion === 7.5) {
-    puntuacionElement.innerHTML = `Su puntuación es de ${puntuacion} -<span style="color: green; margin-left: 10px;">Has ganado!</span>`;
-    pedirCartaElement.setAttribute("disabled", "disabled");
+    pintarMensaje("¡Has ganado!");
+    bloquearBotonVerLoQueHubieraPasado(false);
   } else if (puntuacion > 7.5) {
-    puntuacionElement.innerHTML = `Su puntuación es de ${puntuacion} -<span style="color: red; margin-left: 10px;">Game Over!</span>`;
-    pedirCartaElement.setAttribute("disabled", "disabled");
+    pintarMensaje("¡Has perdido!");
+    bloquearBotonPedirCarta(true);
+    bloquearBotonMePlanto(true);
+    bloquearBotonVerLoQueHubieraPasado(true);
   }
 };
 
-// Me planto
-const mePlanto = (): void => {
+const muestraPuntuacion = (): void => {
+  const puntuacionElement = document.getElementById("puntuacion");
+  if (puntuacionElement && puntuacionElement instanceof HTMLDivElement) {
+    puntuacionElement.innerHTML = `Su puntuación es de: ${puntuacion}`;
+  }
+};
+
+const obtenerMensajePlantado = (): string => {
   let mensaje: string = "";
   if (puntuacion === 7.5) {
     mensaje = "¡Lo has clavado! ¡Enhorabuena!";
-    gameOver();
   } else if (puntuacion < 4) {
     mensaje = "Has sido muy conservador.";
   } else if (puntuacion === 5) {
@@ -173,65 +199,60 @@ const mePlanto = (): void => {
   } else if (puntuacion > 5 && puntuacion < 7.5) {
     mensaje = "Casi casi...";
   }
+  return mensaje;
+};
+
+const pintarMensaje = (mensaje: string): void => {
   const mensajesElement = document.getElementById("mensajes");
+  if (mensajesElement && mensajesElement instanceof HTMLDivElement) {
+    mensajesElement.innerHTML = mensaje;
+  }
+};
+
+// Bloquear botones
+const bloquearBotonPedirCarta = (estaDeshabilitado: boolean): void => {
   const pedirCartaElement = document.getElementById("pedirCarta");
+  if (pedirCartaElement && pedirCartaElement instanceof HTMLButtonElement) {
+    pedirCartaElement.disabled = estaDeshabilitado;
+  }
+};
+
+const bloquearBotonMePlanto = (estaDeshabilitado: boolean): void => {
+  const mePlantoElement = document.getElementById("mePlanto");
+  if (mePlantoElement && mePlantoElement instanceof HTMLButtonElement) {
+    mePlantoElement.disabled = estaDeshabilitado;
+  }
+};
+
+const bloquearBotonVerLoQueHubieraPasado = (
+  estaDeshabilitado: boolean
+): void => {
   const verLoQueHubieraPasadoElement = document.getElementById(
     "verLoQueHubieraPasado"
   );
-
-  if (mensajesElement && pedirCartaElement && verLoQueHubieraPasadoElement) {
-    mensajesElement.textContent = mensaje;
-    pedirCartaElement.setAttribute("disabled", "disabled");
-    verLoQueHubieraPasadoElement.style.display = "block";
+  if (
+    verLoQueHubieraPasadoElement &&
+    verLoQueHubieraPasadoElement instanceof HTMLButtonElement
+  ) {
+    verLoQueHubieraPasadoElement.disabled = estaDeshabilitado;
   }
 };
 
-// Ver lo que hubiera pasado
-const verLoQueHubieraPasado = (): void => {
-  cartasSimuladas = [];
-  let puntuacionSimulada: number = puntuacion;
+// Reiniciar partida
+const reiniciarPartida = (): void => {
+  puntuacion = 0;
+  primeraCartaPedida = false;
+  muestraPuntuacion();
+  bloquearBotonPedirCarta(false);
+  bloquearBotonMePlanto(true);
+  bloquearBotonVerLoQueHubieraPasado(true);
+  pintarMensaje("");
+  muestraCartaBocaAbajo();
+};
 
-  while (puntuacionSimulada < 7.5) {
-    const carta = dameCarta();
-    cartasSimuladas.push(carta);
-    if (valoresCarta[carta] !== undefined) {
-      puntuacionSimulada += valoresCarta[carta];
-    } else {
-      puntuacionSimulada += carta;
-    }
-  }
-
+const muestraCartaBocaAbajo = (): void => {
   const cartasContainer = document.getElementById("cartas");
-  const mensajesElement = document.getElementById("mensajes");
-  if (cartasContainer && mensajesElement) {
-    cartasSimuladas.forEach((carta) => muestraCarta(carta));
-    mensajesElement.innerHTML += `<br/>Si hubieras seguido pidiendo cartas, habrías obtenido una puntuación de: ${puntuacionSimulada}`;
-  }
-};
-
-// Nueva partida
-const nuevaPartida = (): void => {
-  const elementNuevaPartida = document.getElementById("nuevaPartida");
-  if (elementNuevaPartida) {
-    elementNuevaPartida.addEventListener("click", () => {
-      puntuacion = 0;
-      cartasRepartidas.length = 0;
-      cartasSimuladas.length = 0;
-      muestraPuntuacion();
-      const mensajesElement = document.getElementById("mensajes");
-      const cartasContainer = document.getElementById("cartas");
-      const pedirCartaElement = document.getElementById("pedirCarta");
-      const verLoQueHubieraPasadoElement = document.getElementById(
-        "verLoQueHubieraPasado"
-      );
-
-      if (mensajesElement) mensajesElement.textContent = "";
-      if (cartasContainer) cartasContainer.innerHTML = "";
-      if (pedirCartaElement) pedirCartaElement.removeAttribute("disabled");
-      if (verLoQueHubieraPasadoElement)
-        verLoQueHubieraPasadoElement.style.display = "none";
-
-      muestraCartaBocaAbajo();
-    });
+  if (cartasContainer && cartasContainer instanceof HTMLDivElement) {
+    cartasContainer.innerHTML = `<img id="carta" src="https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg" alt="Carta boca abajo" width="250" height="350" />`;
   }
 };

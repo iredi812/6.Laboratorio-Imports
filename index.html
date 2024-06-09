@@ -13,19 +13,16 @@
   <h1>Juego de las 7 y media</h1>
   <div id="app">
     <div id="puntuacion"></div>
-    <div id="cuerpoJuego">
-      <div id="botones">
-        <button id="pedirCarta">Pedir carta</button>
-        <button id="mePlanto">Me planto</button>
-        <button id="nuevaPartida">Nueva partida</button>
-      </div>
-      <div id="cartas">
-        <img id="carta" src="" alt=" Carta boca abajo" width="200" height="350" />
-      </div>
+    <div id="botones">
+      <button id="pedirCarta">Pedir Carta</button>
+      <button id="mePlanto" disabled>Me Planto</button>
+      <button id="verLoQueHubieraPasado" disabled>?</button>
+      <button id="nuevaPartida">Nueva Partida</button>
     </div>
+    <div id="cartas"></div>
     <div id="mensajes"></div>
-    <button id="verLoQueHubieraPasado" style="display: none;">Ver que hubiera pasado...</button>
-    <script type="module" src="src/main.ts"></script>
+  </div>
+  <script type="module" src="src/main.ts"></script>
 </body>
 
 </html>

@@ -28,27 +28,12 @@ h1 {
   color: white;
 }
 
-#cuerpoJuego {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1em;
-}
-
 #botones {
   display: flex;
   flex-direction: row;
   justify-content: center;
   gap: 1em;
   padding: 2em;
-}
-
-#verLoQueHubieraPasado {
-  display: flex;
-  justify-content: center;
-  margin-top: 1em;
-  width: 500px;
 }
 
 button {
