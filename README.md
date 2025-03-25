@@ -1,3 +1,5 @@
+Laboratorio Módulo 6 - Imports
+
 ¿Te acuerdas de la práctica de condicionales? En ella, implementamos el juego de cartas de las siete y media. ¿Qué te parece si hacemos una limpia 😀?
 
 En esta práctica vamos a refactorizar el código para que sea más mantenible y reutilizable, siguiendo los mismos principios que aplicamos en este módulo.
